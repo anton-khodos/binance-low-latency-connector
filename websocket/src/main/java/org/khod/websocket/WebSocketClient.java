@@ -1,6 +1,7 @@
 package org.khod.websocket;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
@@ -8,14 +9,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
+import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.jctools.queues.SpscArrayQueue;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;
@@ -23,12 +22,14 @@ import java.net.URI;
 public final class WebSocketClient {
 
     private static final int MAX_CONTENT_LENGTH = 8192;
-    
+    private final SpscArrayQueue<ByteBuf> queue;
+
     private final URI uri;
     private final EventLoopGroup group;
     private Channel channel;
 
-    public WebSocketClient(String url) {
+    public WebSocketClient(final SpscArrayQueue<ByteBuf> queue, String url) {
+        this.queue = queue;
         try {
             this.uri = new URI(url);
             this.group = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
@@ -48,10 +49,14 @@ public final class WebSocketClient {
         final int port = getPort(scheme);
         final SslContext sslCtx = getSslContext(scheme);
 
+        final WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri,
+                                                                                                    WebSocketVersion.V13,
+                                                                                                    null,
+                                                                                                    true,
+                                                                                                    new DefaultHttpHeaders()
+        );
         final WebSocketClientHandler handler =
-                new WebSocketClientHandler(
-                        WebSocketClientHandshakerFactory.newHandshaker(
-                                uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+                new WebSocketClientHandler(handshaker, queue);
         Bootstrap b = new Bootstrap();
 
         b.group(group)

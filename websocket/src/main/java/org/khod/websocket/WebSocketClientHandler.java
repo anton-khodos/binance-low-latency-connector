@@ -1,26 +1,22 @@
 package org.khod.websocket;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
-import io.netty.util.CharsetUtil;
+import org.jctools.queues.SpscArrayQueue;
 
 public class WebSocketClientHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
+    private final SpscArrayQueue<ByteBuf> queue;
 
-    public WebSocketClientHandler(WebSocketClientHandshaker handshaker) {
+    public WebSocketClientHandler(WebSocketClientHandshaker handshaker, final SpscArrayQueue<ByteBuf> queue) {
         this.handshaker = handshaker;
+        this.queue = queue;
     }
 
     public ChannelFuture handshakeFuture() {
@@ -56,21 +52,12 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<WebSocke
             }
             return;
         }
-
-        if (msg instanceof FullHttpResponse response) {
-            throw new IllegalStateException(
-                    "Unexpected FullHttpResponse (getStatus=" + response.status() +
-                    ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
-        }
-
-        if (msg instanceof TextWebSocketFrame textFrame) {
-            System.out.println("WebSocket Client received message: " + textFrame.text());
-        } else if (msg instanceof PongWebSocketFrame) {
-            System.out.println("WebSocket Client received pong");
-        } else if (msg instanceof CloseWebSocketFrame) {
-            System.out.println("WebSocket Client received closing");
-            ch.close();
-        }
+        ByteBuf buf = msg.content();
+        // Keep buffer alive beyond handler lifetime
+        buf.retain();
+        queue.offer(buf);
+        // release the frame (but not the ByteBuf)
+        msg.release();
     }
 
     @Override

@@ -26,6 +26,11 @@
             <artifactId>netty-all</artifactId>
             <version>4.2.7.Final</version>
         </dependency>
+        <dependency>
+            <groupId>org.jctools</groupId>
+            <artifactId>jctools-core</artifactId>
+            <version>4.0.5</version>
+        </dependency>
 
 
     </dependencies>
