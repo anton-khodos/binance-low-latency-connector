@@ -1,21 +1,28 @@
 package org.khod.websocket;
 
+import com.sun.jdi.ObjectReference;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
-import org.jctools.queues.SpscArrayQueue;
+import io.netty.handler.codec.http.websocketx.*;
 
-public class WebSocketClientHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
+import java.net.URI;
+import java.util.Queue;
+
+public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
-    private final SpscArrayQueue<ByteBuf> queue;
+    private final Queue<ByteBuf> queue;
 
-    public WebSocketClientHandler(WebSocketClientHandshaker handshaker, final SpscArrayQueue<ByteBuf> queue) {
-        this.handshaker = handshaker;
+    public WebSocketClientHandler(URI uri, final Queue<ByteBuf> queue) {
+        this.handshaker = WebSocketClientHandshakerFactory.newHandshaker(uri,
+                                                                         WebSocketVersion.V13,
+                                                                         null,
+                                                                         true,
+                                                                         new DefaultHttpHeaders()
+        );
         this.queue = queue;
     }
 
@@ -39,7 +46,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<WebSocke
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         Channel ch = ctx.channel();
         if (!handshaker.isHandshakeComplete()) {
             try {
@@ -52,12 +59,15 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<WebSocke
             }
             return;
         }
-        ByteBuf buf = msg.content();
-        // Keep buffer alive beyond handler lifetime
-        buf.retain();
-        queue.offer(buf);
-        // release the frame (but not the ByteBuf)
-        msg.release();
+
+        if(msg instanceof WebSocketFrame) {
+            ByteBuf buf = ((WebSocketFrame)msg).content();
+            if(buf.capacity() != 0) {
+                // Keep buffer alive beyond handler lifetime
+                buf.retain();
+                queue.offer(buf);
+            }
+        }
     }
 
     @Override
