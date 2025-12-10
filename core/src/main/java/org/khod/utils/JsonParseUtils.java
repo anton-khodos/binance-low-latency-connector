@@ -1,6 +1,7 @@
 package org.khod.utils;
 
 import io.netty.buffer.ByteBuf;
+import org.khod.data.Decimal64;
 
 //TODO: improve parsing
 public class JsonParseUtils {
@@ -15,6 +16,15 @@ public class JsonParseUtils {
 
     public static void skipByte(ByteBuf buff) {
         buff.readByte();
+    }
+
+    public static void skipWhiteSpaces(ByteBuf buff) {
+        while (buff.isReadable()) {
+            if(!Character.isWhitespace((char) peek(buff))) {
+                return;
+            }
+            byte b = buff.readByte();
+        }
     }
 
     public static void parseString(ByteBuf buff, StringBuilder builder) {
@@ -43,20 +53,49 @@ public class JsonParseUtils {
                 }
                 initialized = true;
             } else {
-               result = (char)b;
+                result = (char)b;
             }
         }
         return result;
     }
 
-    public static boolean parseBoolean(ByteBuf buff) {
-        //TODO
-        if(peek(buff) == 't') {
+    public static boolean parseBoolean(ByteBuf buff)
+            throws JsonParseException {
+        final byte peek = peek(buff);
+        if(peek == 't') {
+            verifyTrue(buff);
             return true;
-        } else if(peek(buff) == 'f') {
+        } else if(peek == 'f') {
+            verifyFalse(buff);
             return false;
         } else {
-            return false;
+            throw new JsonParseException(String.format("Unexpected char '%c' inside boolean value", peek), buff.readerIndex());
+        }
+    }
+
+    private static void verifyTrue(ByteBuf buff)
+            throws JsonParseException {
+        verifyChar(buff, 't');
+        verifyChar(buff, 'r');
+        verifyChar(buff, 'u');
+        verifyChar(buff, 'e');
+    }
+
+    private static void verifyFalse(ByteBuf buff)
+            throws JsonParseException {
+        verifyChar(buff, 'f');
+        verifyChar(buff, 'a');
+        verifyChar(buff, 'l');
+        verifyChar(buff, 's');
+        verifyChar(buff, 'e');
+    }
+
+
+    private static void verifyChar(final ByteBuf buff, final char t)
+            throws JsonParseException {
+        byte b = buff.readByte();
+        if (b != t) {
+            throw new JsonParseException(String.format("Unexpected char '%c' inside boolean value", b), buff.readerIndex());
         }
     }
 
@@ -70,25 +109,34 @@ public class JsonParseUtils {
         return x;
     }
 
-    public static void parseDecimal64(ByteBuf buff, Decimal64 decimal64) {
+    public static void parseDecimal64(ByteBuf buff, Decimal64 decimal64)
+            throws JsonParseException {
         boolean neg = false;
         boolean exponentStarted = false;
         long mantisa = 0;
         int exponent = 0;
 
-        byte peeked = peek(buff);
-        while (peeked >= '0' && peeked <= '9' || peeked == '-' || peeked == '.') {
+        boolean initialized = false;
+        while (buff.isReadable()) {
             byte b = buff.readByte();
-            if(b == '-') {
+            if(b == '\"') {
+                if(initialized) {
+                    break;
+                }
+                initialized = true;
+            } else if(b >= '0' && b <= '9') {
+                mantisa = mantisa * 10 + (b - '0');
+                if(exponentStarted) exponent++;
+            } else if(b == '-') {
                 neg = true;
             } else if(b == '.') {
                 exponentStarted = true;
             } else {
-                mantisa = mantisa * 10 + (buff.readByte() - '0');
-                if(exponentStarted) exponent++;
+                throw new JsonParseException(String.format("Unexpected char '%c' inside decimal value", b),
+                                             buff.readerIndex());
             }
-            peeked = peek(buff);
         }
+
         exponent = neg ? -exponent : exponent;
         decimal64.setExponent(exponent);
         decimal64.setMantisa(mantisa);

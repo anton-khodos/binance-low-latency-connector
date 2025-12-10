@@ -1,4 +1,4 @@
-package org.khod.utils;
+package org.khod.data;
 
 public final class Decimal64 {
     private long mantisa;

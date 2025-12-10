@@ -1,84 +1,84 @@
 package org.khod.json;
 
 import io.netty.buffer.ByteBuf;
-import org.khod.pojo.BinanceAggTrade;
-import org.khod.utils.Decimal64;
-
-import java.text.ParseException;
+import org.khod.pojo.field.*;
+import org.khod.pojo.item.BinanceAggTradePojo;
+import org.khod.data.Decimal64;
+import org.khod.utils.JsonParseException;
+import org.khod.utils.StringUtils;
 
 import static org.khod.utils.JsonParseUtils.*;
 
 public class BinanceJsonParser {
-    private final ThreadLocal<Decimal64> decimal64 = ThreadLocal.withInitial(Decimal64::new);
 
-    public void parseAggTrade(ByteBuf buffer, BinanceAggTrade out)
-            throws ParseException {
-        byte currentKey = -1;
+    private final ThreadLocal<StringBuilder> currentKeyTL = ThreadLocal.withInitial((() -> new StringBuilder(128)));
 
-        while(buffer.isReadable()) {
-            byte peeked = peek(buffer);
-            if(Character.isWhitespace((char) peeked) || peeked == '{' || peeked == '}') {
-                skipByte(buffer);
-                continue;
-            }
-            if (peeked == ':') {
-                if(currentKey == -1) {
-                    throw new ParseException("Failed to parse json. Expected (:) but key was not read for the pair.",
-                                             buffer.readerIndex()
-                    );
-                }
-                skipByte(buffer);
-                continue;
-            }
+    public void parsePojo(ByteBuf buffer, BinanceAggTradePojo pojo)
+            throws JsonParseException {
+        StringBuilder currentKey = currentKeyTL.get();
 
-            if(peeked == '\"') {
-                skipByte(buffer);
-                if (currentKey == -1) {
-                    currentKey = buffer.readByte();
-                    peeked = peek(buffer);
-                    if (peeked != '\"') {
-                        throw new ParseException("Failed to parse json. Expected (\") but was (%c)".formatted((char) peeked),
-                                                 buffer.readerIndex()
-                        );
-                    } else {
-                        skipByte(buffer);
-                    }
-                } else {
-                    Decimal64 value = decimal64.get();
-                    parseDecimal64(buffer, value);
-                    switch (currentKey) {
-                        case 'e': // Event type
-                            break;
-                        case 's': // Symbol
-                            break;
-                        case 'p': // Price
-                            out.setPrice(value);
-                            break;
-                        case 'q': // Quantity
-                            out.setQuantity(value);
-                            break;
-                        case 'm': // Is the buyer the market maker?
-                            break;
-                    }
-                }
-            } else {
-                long value = parseLong(buffer);
-                switch (currentKey) {
-                    case 'E' -> // Event time
-                            out.setEventTime(value);
-                    case 'a' -> // Aggregate trade ID
-                            out.setTradeId(value);
-                    case 'f' -> // First trade ID
-                            out.setFirstTradeId(value);
-                    case 'l' -> // Last trade ID
-                            out.setLastTradeId(value);
-                    case 'T' -> // Trade time
-                            out.setTradeTime(value);
-                }
-            }
+        readVerifyNextChar(buffer, '{');
+
+        while (peek(buffer) != '}') {
+            Field field = parseKey(buffer, pojo, currentKey);
+            readVerifyNextChar(buffer, ':');
+            parseValue(buffer, field);
+            readVerifyNextChar(buffer, ',');
         }
     }
 
+    private static void parseValue(final ByteBuf buffer, final Field field)
+            throws JsonParseException {
+        skipWhiteSpaces(buffer);
+        switch (field.getType()) {
+            case BOOLEAN -> {
+                boolean value = parseBoolean(buffer);
+                ((BooleanField) field).setValue(value);
+            }
+            case LONG -> {
+                long value = parseLong(buffer);
+                ((LongField) field).setValue(value);
+            }
+            case DECIMAL -> {
+                Decimal64 value = ((DecimalField) field).getValue();
+                parseDecimal64(buffer, value);
+            }
+            case STRING -> {
+                StringBuilder value = ((StringField) field).getValue();
+                parseString(buffer, value);
+            }
+        }
+        skipWhiteSpaces(buffer);
+    }
 
+    private static void readVerifyNextChar(final ByteBuf buffer, final char x)
+            throws JsonParseException {
+        skipWhiteSpaces(buffer);
+        char separator = (char) buffer.readByte();
+        if (separator != x) {
+            throw new JsonParseException(String.format("Expected open bracket '%c' but received '%c'", x, separator),
+                                         buffer.readerIndex());
+        }
+        skipWhiteSpaces(buffer);
+    }
+
+    private Field parseKey(final ByteBuf buffer, final BinanceAggTradePojo pojo, final StringBuilder currentKey)
+            throws JsonParseException {
+        currentKey.setLength(0);
+        parseString(buffer, currentKey);
+        return findField(pojo, buffer.readerIndex(), currentKey);
+    }
+
+    private Field findField(BinanceAggTradePojo pojo, int index, CharSequence key)
+            throws JsonParseException {
+        for (int i = 0; i < pojo.getFields().length; i++) {
+            Field field = pojo.getFields()[i];
+            if (StringUtils.charSequenceEquals(field.getName(), key)) {
+                return field;
+            }
+        }
+        throw new JsonParseException(String.format("Unexpected key read '%s'", key),
+                                     index);
+    }
 
 }
