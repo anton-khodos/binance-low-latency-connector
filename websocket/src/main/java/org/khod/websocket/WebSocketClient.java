@@ -13,7 +13,6 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import org.jctools.queues.SpscArrayQueue;
 
 import javax.net.ssl.SSLException;
 import java.net.URI;

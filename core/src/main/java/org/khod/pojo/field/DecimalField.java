@@ -16,4 +16,9 @@ public class DecimalField extends Field {
     public void setValue(final Decimal64 value) {
         value.copyTo(this.value);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)=%s", getName(), getDescription(), value);
+    }
 }

@@ -5,9 +5,10 @@ import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.khod.pojo.field.BooleanField;
+import org.khod.pojo.field.DecimalField;
 import org.khod.pojo.field.LongField;
 import org.khod.pojo.field.StringField;
-import org.khod.pojo.item.BinanceAggTradePojo;
+import org.khod.pojo.item.BinanceAggTrade;
 import org.khod.utils.JsonParseException;
 
 import java.nio.charset.StandardCharsets;
@@ -35,24 +36,23 @@ public class BinanceJsonParserTests {
     public void parseBinanceAggTradePojo()
             throws JsonParseException {
         BinanceJsonParser parser = new BinanceJsonParser();
-        BinanceAggTradePojo pojo = new BinanceAggTradePojo();
+        BinanceAggTrade pojo = new BinanceAggTrade();
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(aggTradeJson.length());
         buffer.writeCharSequence(aggTradeJson, StandardCharsets.US_ASCII);
 
         parser.parsePojo(buffer, pojo);
 
-        Assertions.assertEquals(((StringField)pojo.getFieldMap().get("e")).getValue().toString(), "aggTrade");
-        Assertions.assertEquals(((LongField)pojo.getFieldMap().get("E")).getValue(), 123456789);
-        Assertions.assertEquals(((StringField)pojo.getFieldMap().get("s")).getValue().toString(), "BTCUSDT");
-        Assertions.assertEquals(((LongField)pojo.getFieldMap().get("a")).getValue(), 5933014);
+        Assertions.assertEquals("aggTrade", ((StringField)pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(123456789, ((LongField)pojo.getFieldMap().get("E")).getValue());
+        Assertions.assertEquals("BTCUSDT", ((StringField)pojo.getFieldMap().get("s")).getValue().toString());
+        Assertions.assertEquals(5933014, ((LongField)pojo.getFieldMap().get("a")).getValue());
 
-        //TODO: fix decimal64 parsing.
-//        Assertions.assertEquals(((DecimalField)pojo.getFieldMap().get("p")).getValue().toString(), "0.001");
-//        Assertions.assertEquals(((DecimalField)pojo.getFieldMap().get("q")).getValue().toString(), "100");
+        Assertions.assertEquals("0.001", ((DecimalField)pojo.getFieldMap().get("p")).getValue().toString());
+        Assertions.assertEquals("100", ((DecimalField)pojo.getFieldMap().get("q")).getValue().toString());
 
-        Assertions.assertEquals(((LongField)pojo.getFieldMap().get("f")).getValue(), 100);
-        Assertions.assertEquals(((LongField)pojo.getFieldMap().get("l")).getValue(), 105);
-        Assertions.assertEquals(((LongField)pojo.getFieldMap().get("T")).getValue(), 123456785);
+        Assertions.assertEquals(100, ((LongField)pojo.getFieldMap().get("f")).getValue());
+        Assertions.assertEquals(105, ((LongField)pojo.getFieldMap().get("l")).getValue());
+        Assertions.assertEquals(123456785, ((LongField)pojo.getFieldMap().get("T")).getValue());
         Assertions.assertTrue(((BooleanField) pojo.getFieldMap().get("m")).getValue());
 
     }

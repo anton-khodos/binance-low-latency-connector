@@ -14,4 +14,9 @@ public class LongField extends Field {
     public void setValue(final long value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)=%s", getName(), getDescription(), value);
+    }
 }

@@ -17,7 +17,7 @@ import org.khod.pojo.field.*;
  * }
  */
 
-public class BinanceAggTradePojo extends DefaultPojoItem {
+public class BinanceAggTrade extends DefaultPojoItem {
     @Override
     Field[] getFieldDefinition() {
         return new Field[] {

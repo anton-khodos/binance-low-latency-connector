@@ -14,4 +14,9 @@ public class BooleanField extends Field {
     public void setValue(final boolean value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)=%s", getName(), getDescription(), value);
+    }
 }

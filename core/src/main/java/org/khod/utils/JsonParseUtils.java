@@ -137,9 +137,9 @@ public class JsonParseUtils {
             }
         }
 
-        exponent = neg ? -exponent : exponent;
-        decimal64.setExponent(exponent);
-        decimal64.setMantisa(mantisa);
+        mantisa = neg ? -mantisa : mantisa;
+        decimal64.setExponent(-exponent);
+        decimal64.setMantissa(mantisa);
     }
 
 }

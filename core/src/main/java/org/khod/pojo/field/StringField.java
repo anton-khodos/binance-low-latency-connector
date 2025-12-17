@@ -15,4 +15,9 @@ public class StringField extends Field {
         this.value.setLength(0);
         this.value.append(value);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)=%s", getName(), getDescription(), value);
+    }
 }

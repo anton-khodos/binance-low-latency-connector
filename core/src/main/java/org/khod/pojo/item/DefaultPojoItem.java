@@ -28,4 +28,15 @@ public abstract class DefaultPojoItem {
     public Map<String, Field> getFieldMap() {
         return fieldMap;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder itemMapSB = new StringBuilder();
+        for (final Field field : fields) {
+            itemMapSB.append("");
+            itemMapSB.append(field.toString());
+            itemMapSB.append(", ");
+        }
+        return this.getClass().getSimpleName() + "{fields=" + itemMapSB + '}';
+    }
 }
