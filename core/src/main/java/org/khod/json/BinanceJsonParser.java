@@ -9,11 +9,11 @@ import org.khod.utils.StringUtils;
 
 import static org.khod.utils.JsonParseUtils.*;
 
-public class BinanceJsonParser<T extends DefaultPojoItem> {
+public class BinanceJsonParser {
 
-    private final ThreadLocal<StringBuilder> currentKeyTL = ThreadLocal.withInitial((() -> new StringBuilder(128)));
+    private static final ThreadLocal<StringBuilder> currentKeyTL = ThreadLocal.withInitial((() -> new StringBuilder(128)));
 
-    public void parsePojo(ByteBuf buffer, T pojo)
+    public static<T extends DefaultPojoItem> void  parsePojo(ByteBuf buffer, T pojo)
             throws JsonParseException {
         StringBuilder currentKey = currentKeyTL.get();
 
@@ -50,6 +50,11 @@ public class BinanceJsonParser<T extends DefaultPojoItem> {
                 value.setLength(0);
                 parseString(buffer, value);
             }
+            case OBJECT -> {
+                parsePojo(buffer, ((ObjectField) field).getValue());
+            }
+            case ARRAY -> {
+            }
         }
         skipWhiteSpaces(buffer);
     }
@@ -65,14 +70,14 @@ public class BinanceJsonParser<T extends DefaultPojoItem> {
         skipWhiteSpaces(buffer);
     }
 
-    private Field parseKey(final ByteBuf buffer, final T pojo, final StringBuilder currentKey)
+    private static <T extends DefaultPojoItem> Field parseKey(final ByteBuf buffer, final T pojo, final StringBuilder currentKey)
             throws JsonParseException {
         currentKey.setLength(0);
         parseString(buffer, currentKey);
         return findField(pojo, buffer.readerIndex(), currentKey);
     }
 
-    private Field findField(T pojo, int index, CharSequence key)
+    private static <T extends DefaultPojoItem> Field findField(T pojo, int index, CharSequence key)
             throws JsonParseException {
         for (int i = 0; i < pojo.getFields().length; i++) {
             Field field = pojo.getFields()[i];

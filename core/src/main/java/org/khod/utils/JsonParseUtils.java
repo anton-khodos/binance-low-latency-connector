@@ -6,19 +6,14 @@ import org.khod.data.Decimal64;
 //TODO: improve parsing
 public class JsonParseUtils {
 
-    public static byte peek(ByteBuf buff) {
+    public static byte peek(ByteBuf buff) throws JsonParseException {
+        if (!buff.isReadable()) {
+            throw new JsonParseException(String.format("Incomplete json received."), buff.readerIndex());
+        }
         return buff.getByte(buff.readerIndex());
     }
 
-    public static byte peek(ByteBuf buff, int index) {
-        return buff.getByte(buff.readerIndex() + index);
-    }
-
-    public static void skipByte(ByteBuf buff) {
-        buff.readByte();
-    }
-
-    public static void skipWhiteSpaces(ByteBuf buff) {
+    public static void skipWhiteSpaces(ByteBuf buff) throws JsonParseException {
         while (buff.isReadable()) {
             if(!Character.isWhitespace((char) peek(buff))) {
                 return;
@@ -99,7 +94,7 @@ public class JsonParseUtils {
         }
     }
 
-    public static long parseLong(ByteBuf buff) {
+    public static long parseLong(ByteBuf buff) throws JsonParseException {
         long x = 0;
         byte peeked = peek(buff);
         while (peeked >= '0' && peeked <= '9') {

@@ -23,7 +23,7 @@ public abstract class DefaultPojoItem {
         return fields;
     }
 
-    abstract Field[] getFieldDefinition();
+    protected abstract Field[] getFieldDefinition();
 
     public Map<String, Field> getFieldMap() {
         return fieldMap;

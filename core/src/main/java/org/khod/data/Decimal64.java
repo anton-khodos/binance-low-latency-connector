@@ -111,11 +111,11 @@ public final class Decimal64 implements Comparable<Decimal64> {
 
         if (point <= 0) {
             sb.append("0.");
-            for (int i = 0; i < -point; i++) sb.append('0');
+            sb.append("0".repeat(Math.max(0, -point)));
             sb.append(s);
         } else if (point >= s.length()) {
             sb.append(s);
-            for (int i = 0; i < point - s.length(); i++) sb.append('0');
+            sb.append("0".repeat(point - s.length()));
         } else {
             sb.append(s, 0, point);
             sb.append('.');

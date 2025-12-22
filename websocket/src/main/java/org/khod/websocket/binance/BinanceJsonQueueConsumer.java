@@ -17,7 +17,6 @@ public class BinanceJsonQueueConsumer<T extends DefaultPojoItem> implements ILif
 
     private final SpscArrayQueue<ByteBuf> queue;
     private final IWebSocketCallback<T> callback;
-    private final BinanceJsonParser<T> jsonParser;
     private final T flyweightItem;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final Thread runnerThread;
@@ -29,7 +28,6 @@ public class BinanceJsonQueueConsumer<T extends DefaultPojoItem> implements ILif
         this.queue = queue;
         this.callback = callback;
         this.flyweightItem = flyweightItem;
-        jsonParser = new BinanceJsonParser<>();
         runnerThread = new Thread(this::run, "Thread-" + flyweightItem.getClass().getSimpleName() + "-consumer");
         runnerThread.setDaemon(true);
     }
@@ -68,7 +66,7 @@ public class BinanceJsonQueueConsumer<T extends DefaultPojoItem> implements ILif
 
     private void processBuffer(final ByteBuf buffer) {
         try {
-            jsonParser.parsePojo(buffer, flyweightItem);
+            BinanceJsonParser.parsePojo(buffer, flyweightItem);
             callback.onMessage(flyweightItem);
         } catch (Exception e) {
             logger.atError().setCause(e).log("Failed to process message.");
