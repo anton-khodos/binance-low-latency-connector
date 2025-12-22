@@ -42,6 +42,7 @@ public final class Decimal64 implements Comparable<Decimal64> {
     public Decimal64(long value, int scale) {
         this.mantissa = value;
         this.exponent = scale;
+        normalize();
         sb = new StringBuilder(32);
     }
 
@@ -86,7 +87,7 @@ public final class Decimal64 implements Comparable<Decimal64> {
         return Math.pow(10.0, exp);
     }
 
-    private void normalize() {
+    public void normalize() {
         if (mantissa == 0) {
             exponent = 0;
             return;

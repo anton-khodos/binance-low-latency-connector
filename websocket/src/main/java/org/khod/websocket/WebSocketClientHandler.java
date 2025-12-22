@@ -67,7 +67,10 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             if(buf.capacity() != 0) {
                 // Keep buffer alive beyond handler lifetime
                 buf.retain();
-                queue.offer(buf);
+                if (!queue.offer(buf)) {
+                    logger.atWarn().log("Failed to push message into the queue. Consumer doesn't keep up with the "
+                                        + "producer!");
+                }
             }
         }
     }

@@ -140,6 +140,7 @@ public class JsonParseUtils {
         mantisa = neg ? -mantisa : mantisa;
         decimal64.setExponent(-exponent);
         decimal64.setMantissa(mantisa);
+        decimal64.normalize();
     }
 
 }

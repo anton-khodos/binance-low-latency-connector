@@ -3,6 +3,7 @@ package org.khod.websocket.binance;
 import io.netty.buffer.ByteBuf;
 import org.jctools.queues.SpscArrayQueue;
 import org.khod.pojo.item.BinanceAggTrade;
+import org.khod.pojo.item.BinanceSymbolBook;
 import org.khod.utils.URLBuilder;
 import org.khod.websocket.IWebSocketCallback;
 import org.khod.websocket.WebSocketClient;
@@ -28,6 +29,25 @@ public class BinanceWebSocketClient {
 
         WebSocketClient client = new WebSocketClient(queue, url);
         BinanceJsonQueueConsumer<BinanceAggTrade> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
+                                                                                                        onMessageCallback,
+                                                                                                        flyweightItem
+        );
+        WebSocketConnection connection = new WebSocketConnection(client, aggTradeJsonConsumer);
+        connection.start();
+        connections[connectionIndex] = connection;
+
+        return connectionIndex++;
+    }
+
+    public int individualSymbolBookStream(String symbol, IWebSocketCallback<BinanceSymbolBook> onMessageCallback) {
+        final SpscArrayQueue<ByteBuf> queue = new SpscArrayQueue<>(1024);
+        final BinanceSymbolBook flyweightItem = new BinanceSymbolBook();
+        final String url = useTestURL ?
+                URLBuilder.buildBinanceTestURL(symbol, "bookTicker") :
+                URLBuilder.buildBinanceProdURL(symbol, "bookTicker");
+
+        WebSocketClient client = new WebSocketClient(queue, url);
+        BinanceJsonQueueConsumer<BinanceSymbolBook> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
                                                                                                         onMessageCallback,
                                                                                                         flyweightItem
         );

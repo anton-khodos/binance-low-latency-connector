@@ -57,7 +57,6 @@ public class BinanceJsonQueueConsumer<T extends DefaultPojoItem> implements ILif
                 idle = 0;
                 processBuffer(buffer);
             } else {
-//                logger.atInfo().log("EMPTY");
                 if (++idle < 100) {
                     Thread.onSpinWait();
                 } else {
