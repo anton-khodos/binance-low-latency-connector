@@ -93,6 +93,27 @@ public class BinanceJsonParserTests {
                "A":"40.66000000"
              }""";
 
+    private final static String depthUpdateJson = """
+            {
+              "e": "depthUpdate",
+              "E": 123456789,
+              "s": "BTCUSDT",
+              "U": 157,
+              "u": 160,
+              "b": [
+                [
+                  "0.0024",
+                  "10"
+                ]
+              ],
+              "a": [
+                [
+                  "0.0026",
+                  "100"
+                ]
+              ]
+            }""";
+
     public static final String INCOMPLETE_JSON = """
             {
               "e": "aggTrade",
@@ -201,6 +222,38 @@ public class BinanceJsonParserTests {
         Assertions.assertEquals("0.5", ((DecimalField) internalKline.getFieldMap().get("Q")).getValue().toString());
         Assertions.assertEquals("123456", ((StringField) internalKline.getFieldMap().get("B")).getValue().toString());
     }
+
+    @Test
+    public void parseDepthUpdateJsonShouldNotThrow()
+            throws JsonParseException {
+        DepthUpdate pojo = new DepthUpdate(5);
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(depthUpdateJson.length());
+        buffer.writeCharSequence(depthUpdateJson, StandardCharsets.US_ASCII);
+
+        BinanceJsonParser.parsePojo(buffer, pojo);
+
+        Assertions.assertEquals("depthUpdate", ((StringField) pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(123456789, ((LongField) pojo.getFieldMap().get("E")).getValue());
+        Assertions.assertEquals("BTCUSDT", ((StringField) pojo.getFieldMap().get("s")).getValue().toString());
+        Assertions.assertEquals(157, ((LongField) pojo.getFieldMap().get("U")).getValue());
+        Assertions.assertEquals(160, ((LongField) pojo.getFieldMap().get("u")).getValue());
+
+        ArrayField bids = (ArrayField) pojo.getFieldMap().get("b");
+        Assertions.assertEquals(1, bids.getSize());
+
+        ArrayField bidEntry = (ArrayField)bids.getValue()[0];
+        Assertions.assertEquals(2, bidEntry.getSize());
+        Assertions.assertEquals("0.0024", ((DecimalField) bidEntry.getValue()[0]).getValue().toString());
+        Assertions.assertEquals("10", ((DecimalField) bidEntry.getValue()[1]).getValue().toString());
+
+        ArrayField asks = (ArrayField) pojo.getFieldMap().get("a");
+        Assertions.assertEquals(1, asks.getSize());
+        ArrayField askEntry = (ArrayField)asks.getValue()[0];
+        Assertions.assertEquals(2, askEntry.getSize());
+        Assertions.assertEquals("0.0026", ((DecimalField) askEntry.getValue()[0]).getValue().toString());
+        Assertions.assertEquals("100", ((DecimalField) askEntry.getValue()[1]).getValue().toString());
+    }
+
 
     @Test
     public void parseInvalidJsonShouldThrow() {

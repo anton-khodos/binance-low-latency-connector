@@ -3,7 +3,6 @@ package org.khod.utils;
 import io.netty.buffer.ByteBuf;
 import org.khod.data.Decimal64;
 
-//TODO: improve parsing
 public class JsonParseUtils {
 
     public static byte peek(ByteBuf buff) throws JsonParseException {

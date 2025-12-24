@@ -18,8 +18,11 @@ import org.khod.pojo.field.*;
  */
 
 public class BinanceAggTrade extends DefaultPojoItem {
-    @Override
-    protected Field[] getFieldDefinition() {
+    public BinanceAggTrade() {
+        super(getFieldDefinition());
+    }
+
+    private static Field[] getFieldDefinition() {
         return new Field[] {
             new StringField("e", "Event type"),
             new LongField("E", "Event time"),

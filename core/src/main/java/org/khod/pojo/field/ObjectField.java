@@ -6,14 +6,9 @@ public class ObjectField extends Field {
 
     private final DefaultPojoItem internalObject;
 
-    public ObjectField(String name, String description, FieldType type, Field[] fields) {
-        super(name, description, type);
-        internalObject = new DefaultPojoItem() {
-            @Override
-            protected Field[] getFieldDefinition() {
-                return fields;
-            }
-        };
+    public ObjectField(String name, String description, Field[] fields) {
+        super(name, description, FieldType.OBJECT);
+        internalObject = new DefaultPojoItem(fields) { };
     }
 
     @Override

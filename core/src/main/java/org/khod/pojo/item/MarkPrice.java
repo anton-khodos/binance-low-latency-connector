@@ -19,8 +19,12 @@ import org.khod.pojo.field.StringField;
  */
 
 public class MarkPrice extends DefaultPojoItem {
-    @Override
-    protected Field[] getFieldDefinition() {
+    public MarkPrice() {
+        super(getFieldDefinition());
+    }
+
+
+    private static Field[] getFieldDefinition() {
         return new Field[]{
                 new StringField("e", "Event type"),
                 new LongField("E", "Event time"),

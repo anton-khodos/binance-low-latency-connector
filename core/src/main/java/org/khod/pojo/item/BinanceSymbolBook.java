@@ -17,8 +17,11 @@ import org.khod.pojo.field.*;
  */
 
 public class BinanceSymbolBook extends DefaultPojoItem {
-    @Override
-    protected Field[] getFieldDefinition() {
+    public BinanceSymbolBook() {
+        super(getFieldDefinition());
+    }
+
+    private static Field[] getFieldDefinition() {
         return new Field[] {
                 new StringField("e", "Event type"),
                 new LongField("u", "order book updateId"),

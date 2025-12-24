@@ -13,7 +13,7 @@ public class BinanceJsonParser {
 
     private static final ThreadLocal<StringBuilder> currentKeyTL = ThreadLocal.withInitial((() -> new StringBuilder(128)));
 
-    public static<T extends DefaultPojoItem> void  parsePojo(ByteBuf buffer, T pojo)
+    public static<T extends DefaultPojoItem> void parsePojo(ByteBuf buffer, T pojo)
             throws JsonParseException {
         StringBuilder currentKey = currentKeyTL.get();
 
@@ -27,6 +27,21 @@ public class BinanceJsonParser {
                 readVerifyNextChar(buffer, ',');
             }
         }
+    }
+
+    private static void parseArray(final ByteBuf buffer, final ArrayField arrayField)
+            throws JsonParseException {
+        arrayField.initialize();
+        readVerifyNextChar(buffer, '[');
+        while (peek(buffer) != ']') {
+            Field elementField = arrayField.getNextField();
+            parseValue(buffer, elementField);
+            if(peek(buffer) != ']') {
+                readVerifyNextChar(buffer, ',');
+            }
+        }
+        buffer.readByte(); // consume closing ']'
+        arrayField.finalizeArray();
     }
 
     private static void parseValue(final ByteBuf buffer, final Field field)
@@ -54,10 +69,13 @@ public class BinanceJsonParser {
                 parsePojo(buffer, ((ObjectField) field).getValue());
             }
             case ARRAY -> {
+                parseArray(buffer, ((ArrayField) field));
             }
         }
         skipWhiteSpaces(buffer);
     }
+
+
 
     private static void readVerifyNextChar(final ByteBuf buffer, final char x)
             throws JsonParseException {

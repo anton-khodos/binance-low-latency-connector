@@ -30,13 +30,16 @@ import org.khod.pojo.field.*;
  */
 
 public class Kline extends DefaultPojoItem {
-    @Override
-    protected Field[] getFieldDefinition() {
+    public Kline() {
+        super(getFieldDefinition());
+    }
+
+    private static Field[] getFieldDefinition() {
         return new Field[] {
                 new StringField("e", "Event type"),
                 new LongField("E", "Event time"),
                 new StringField("s", "Symbol"),
-                new ObjectField("k", "Kline data", FieldType.OBJECT, new Field[] {
+                new ObjectField("k", "Kline data", new Field[] {
                         new LongField("t", "Kline start time"),
                         new LongField("T", "Kline close time"),
                         new StringField("s", "Symbol"),

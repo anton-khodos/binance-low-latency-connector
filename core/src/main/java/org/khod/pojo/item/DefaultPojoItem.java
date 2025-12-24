@@ -9,8 +9,8 @@ public abstract class DefaultPojoItem {
     private final Field[] fields;
     private final Map<String, Field> fieldMap;
 
-    public DefaultPojoItem() {
-        this.fields = getFieldDefinition();
+    public DefaultPojoItem(Field[] fields) {
+        this.fields = fields;
         this.fieldMap = new HashMap<>(fields.length);
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
@@ -22,8 +22,6 @@ public abstract class DefaultPojoItem {
     public Field[] getFields() {
         return fields;
     }
-
-    protected abstract Field[] getFieldDefinition();
 
     public Map<String, Field> getFieldMap() {
         return fieldMap;
