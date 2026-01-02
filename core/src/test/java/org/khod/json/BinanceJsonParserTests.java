@@ -114,6 +114,86 @@ public class BinanceJsonParserTests {
               ]
             }""";
 
+    public static final String forcedOrderJson = """
+            {
+              "e": "forceOrder",
+              "E": 1623499200000,
+              "o": {
+                "s": "BTCUSDT",
+                "S": "SELL",
+                "o": "MARKET",
+                "f": "IOC",
+                "q": "0.001",
+                "p": "0",
+                "ap": "35000.00",
+                "X": "FILLED",
+                "l": "0.001",
+                "z": "0.001",
+                "T": 1623499200000
+              }
+            }""";
+
+    public static final String individialSymbolTickerJson = """
+            {
+              "e": "24hrTicker",
+              "E": 123456789,
+              "s": "BTCUSDT",
+              "p": "500.00",
+              "P": "5.00",
+              "w": "10000.00",
+              "c": "10500.00",
+              "Q": "0.001",
+              "o": "10000.00",
+              "h": "11000.00",
+              "l": "9000.00",
+              "v": "1500.00",
+              "q": "15000000.00",
+              "O": 123456000,
+              "C": 123456999,
+              "F": 100,
+              "L": 200,
+              "n": 1000
+            }""";
+
+    private static final String individialSymbolMiniTickerJson = """
+            {
+              "e": "24hrMiniTicker",
+              "E": 123456789,
+              "s": "BTCUSDT",
+              "c": "10500.00",
+              "o": "10000.00",
+              "h": "11000.00",
+              "l": "9000.00",
+              "v": "1500.00",
+              "q": "15000000.00"
+            }""";
+
+    private static final String continuousKlineJson = """
+            {
+              "e":"continuous_kline",
+              "E":1591261542539,
+              "ps":"BTCUSD",
+              "ct":"NEXT_QUARTER",
+              "k":{
+                "t":1591261500000,
+                "T":1591261559999,
+                "i":"1m",
+                "f":606400,
+                "L":606430,
+                "o":"9638.9",
+                "c":"9639.8",
+                "h":"9639.8",
+                "l":"9638.6",
+                "v":"156",
+                "n":31,
+                "x":false,
+                "q":"1.61836886",
+                "V":"73",
+                "Q":"0.75731156",
+                "B":"0"
+              }
+            }""";
+
     public static final String INCOMPLETE_JSON = """
             {
               "e": "aggTrade",
@@ -253,6 +333,113 @@ public class BinanceJsonParserTests {
         Assertions.assertEquals("100", ((DecimalField) askEntry.getValue()[1]).getValue().toString());
     }
 
+    @Test
+    public void parseForcedOrderJsonShouldNotThrow()
+            throws JsonParseException {
+        ForceOrder pojo = new ForceOrder();
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(forcedOrderJson.length());
+        buffer.writeCharSequence(forcedOrderJson, StandardCharsets.US_ASCII);
+
+        BinanceJsonParser.parsePojo(buffer, pojo);
+
+        Assertions.assertEquals("forceOrder", ((StringField) pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(1623499200000L, ((LongField) pojo.getFieldMap().get("E")).getValue());
+
+        DefaultPojoItem order = ((ObjectField) pojo.getFieldMap().get("o")).getValue();
+        Assertions.assertEquals("BTCUSDT", ((StringField) order.getFieldMap().get("s")).getValue().toString());
+        Assertions.assertEquals("SELL", ((StringField) order.getFieldMap().get("S")).getValue().toString());
+        Assertions.assertEquals("MARKET", ((StringField) order.getFieldMap().get("o")).getValue().toString());
+        Assertions.assertEquals("IOC", ((StringField) order.getFieldMap().get("f")).getValue().toString());
+        Assertions.assertEquals("0.001", ((DecimalField) order.getFieldMap().get("q")).getValue().toString());
+        Assertions.assertEquals("0", ((DecimalField) order.getFieldMap().get("p")).getValue().toString());
+        Assertions.assertEquals("35000", ((DecimalField) order.getFieldMap().get("ap")).getValue().toString());
+        Assertions.assertEquals("FILLED", ((StringField) order.getFieldMap().get("X")).getValue().toString());
+        Assertions.assertEquals("0.001", ((DecimalField) order.getFieldMap().get("l")).getValue().toString());
+        Assertions.assertEquals("0.001", ((DecimalField) order.getFieldMap().get("z")).getValue().toString());
+        Assertions.assertEquals(1623499200000L, ((LongField) order.getFieldMap().get("T")).getValue());
+    }
+
+    @Test
+    public void parseIndividialSymbolTickerJsonShouldNotThrow()
+            throws JsonParseException {
+        IndividualSymbol pojo = new IndividualSymbol();
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(individialSymbolTickerJson.length());
+        buffer.writeCharSequence(individialSymbolTickerJson, StandardCharsets.US_ASCII);
+
+        BinanceJsonParser.parsePojo(buffer, pojo);
+
+        Assertions.assertEquals("24hrTicker", ((StringField) pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(123456789, ((LongField) pojo.getFieldMap().get("E")).getValue());
+        Assertions.assertEquals("BTCUSDT", ((StringField) pojo.getFieldMap().get("s")).getValue().toString());
+        Assertions.assertEquals("500", ((DecimalField) pojo.getFieldMap().get("p")).getValue().toString());
+        Assertions.assertEquals("5", ((DecimalField) pojo.getFieldMap().get("P")).getValue().toString());
+        Assertions.assertEquals("10000", ((DecimalField) pojo.getFieldMap().get("w")).getValue().toString());
+        Assertions.assertEquals("10500", ((DecimalField) pojo.getFieldMap().get("c")).getValue().toString());
+        Assertions.assertEquals("0.001", ((DecimalField) pojo.getFieldMap().get("Q")).getValue().toString());
+        Assertions.assertEquals("10000", ((DecimalField) pojo.getFieldMap().get("o")).getValue().toString());
+        Assertions.assertEquals("11000", ((DecimalField) pojo.getFieldMap().get("h")).getValue().toString());
+        Assertions.assertEquals("9000", ((DecimalField) pojo.getFieldMap().get("l")).getValue().toString());
+        Assertions.assertEquals("1500", ((DecimalField) pojo.getFieldMap().get("v")).getValue().toString());
+        Assertions.assertEquals("15000000", ((DecimalField) pojo.getFieldMap().get("q")).getValue().toString());
+        Assertions.assertEquals(123456000L, ((LongField) pojo.getFieldMap().get("O")).getValue());
+        Assertions.assertEquals(123456999L, ((LongField) pojo.getFieldMap().get("C")).getValue());
+        Assertions.assertEquals(100, ((LongField) pojo.getFieldMap().get("F")).getValue());
+        Assertions.assertEquals(200, ((LongField) pojo.getFieldMap().get("L")).getValue());
+        Assertions.assertEquals(1000, ((LongField) pojo.getFieldMap().get("n")).getValue());
+    }
+
+    @Test
+    public void parseIndividialSymbolMiniTickerJsonShouldNotThrow()
+            throws JsonParseException {
+        IndividualSymbolMini pojo = new IndividualSymbolMini();
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(individialSymbolMiniTickerJson.length());
+        buffer.writeCharSequence(individialSymbolMiniTickerJson, StandardCharsets.US_ASCII);
+
+        BinanceJsonParser.parsePojo(buffer, pojo);
+
+        Assertions.assertEquals("24hrMiniTicker", ((StringField) pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(123456789, ((LongField) pojo.getFieldMap().get("E")).getValue());
+        Assertions.assertEquals("BTCUSDT", ((StringField) pojo.getFieldMap().get("s")).getValue().toString());
+        Assertions.assertEquals("10500", ((DecimalField) pojo.getFieldMap().get("c")).getValue().toString());
+        Assertions.assertEquals("10000", ((DecimalField) pojo.getFieldMap().get("o")).getValue().toString());
+        Assertions.assertEquals("11000", ((DecimalField) pojo.getFieldMap().get("h")).getValue().toString());
+        Assertions.assertEquals("9000", ((DecimalField) pojo.getFieldMap().get("l")).getValue().toString());
+        Assertions.assertEquals("1500", ((DecimalField) pojo.getFieldMap().get("v")).getValue().toString());
+        Assertions.assertEquals("15000000", ((DecimalField) pojo.getFieldMap().get("q")).getValue().toString());
+    }
+
+    @Test
+    public void parseContinuousKlineJsonShouldNotThrow()
+            throws JsonParseException {
+        ContinuousKline pojo = new ContinuousKline();
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(continuousKlineJson.length());
+        buffer.writeCharSequence(continuousKlineJson, StandardCharsets.US_ASCII);
+
+        BinanceJsonParser.parsePojo(buffer, pojo);
+
+        Assertions.assertEquals("continuous_kline", ((StringField) pojo.getFieldMap().get("e")).getValue().toString());
+        Assertions.assertEquals(1591261542539L, ((LongField) pojo.getFieldMap().get("E")).getValue());
+        Assertions.assertEquals("BTCUSD", ((StringField) pojo.getFieldMap().get("ps")).getValue().toString());
+        Assertions.assertEquals("NEXT_QUARTER", ((StringField) pojo.getFieldMap().get("ct")).getValue().toString());
+
+        DefaultPojoItem internalKline = ((ObjectField)pojo.getFieldMap().get("k")).getValue();
+        Assertions.assertEquals(1591261500000L, ((LongField) internalKline.getFieldMap().get("t")).getValue());
+        Assertions.assertEquals(1591261559999L, ((LongField) internalKline.getFieldMap().get("T")).getValue());
+        Assertions.assertEquals("1m", ((StringField) internalKline.getFieldMap().get("i")).getValue().toString());
+        Assertions.assertEquals(606400, ((LongField) internalKline.getFieldMap().get("f")).getValue());
+        Assertions.assertEquals(606430, ((LongField) internalKline.getFieldMap().get("L")).getValue());
+        Assertions.assertEquals("9638.9", ((DecimalField) internalKline.getFieldMap().get("o")).getValue().toString());
+        Assertions.assertEquals("9639.8", ((DecimalField) internalKline.getFieldMap().get("c")).getValue().toString());
+        Assertions.assertEquals("9639.8", ((DecimalField) internalKline.getFieldMap().get("h")).getValue().toString());
+        Assertions.assertEquals("9638.6", ((DecimalField) internalKline.getFieldMap().get("l")).getValue().toString());
+        Assertions.assertEquals("156", ((DecimalField) internalKline.getFieldMap().get("v")).getValue().toString());
+        Assertions.assertEquals(31, ((LongField) internalKline.getFieldMap().get("n")).getValue());
+        Assertions.assertFalse(((BooleanField) internalKline.getFieldMap().get("x")).getValue());
+        Assertions.assertEquals("1.61836886", ((DecimalField) internalKline.getFieldMap().get("q")).getValue().toString());
+        Assertions.assertEquals("73", ((DecimalField) internalKline.getFieldMap().get("V")).getValue().toString());
+        Assertions.assertEquals("0.75731156", ((DecimalField) internalKline.getFieldMap().get("Q")).getValue().toString());
+        Assertions.assertEquals("0", ((StringField) internalKline.getFieldMap().get("B")).getValue().toString());
+    }
 
     @Test
     public void parseInvalidJsonShouldThrow() {

@@ -1,5 +1,10 @@
 package org.khod.pojo.item;
 
+import org.khod.pojo.field.Field;
+import org.khod.pojo.field.LongField;
+import org.khod.pojo.field.ObjectField;
+import org.khod.pojo.field.StringField;
+
 /**
  * {
  *   "e":"continuous_kline",	// Event type
@@ -26,5 +31,36 @@ package org.khod.pojo.item;
  *   }
  * }
  */
-public class ContinuousKline {
+public class ContinuousKline extends DefaultPojoItem {
+
+    public ContinuousKline() {
+        super(getFieldDefinition());
+    }
+
+    private static Field[] getFieldDefinition() {
+        return new Field[] {
+                new StringField("e", "Event type"),
+                new LongField("E", "Event time"),
+                new StringField("ps", "Pair"),
+                new StringField("ct", "Contract type"),
+                new ObjectField("k", "Kline data", new Field[] {
+                        new LongField("t", "Kline start time"),
+                        new LongField("T", "Kline close time"),
+                        new StringField("i", "Interval"),
+                        new LongField("f", "First update ID"),
+                        new LongField("L", "Last update ID"),
+                        new org.khod.pojo.field.DecimalField("o", "Open price"),
+                        new org.khod.pojo.field.DecimalField("c", "Close price"),
+                        new org.khod.pojo.field.DecimalField("h", "High price"),
+                        new org.khod.pojo.field.DecimalField("l", "Low price"),
+                        new org.khod.pojo.field.DecimalField("v", "Volume"),
+                        new LongField("n", "Number of trades"),
+                        new org.khod.pojo.field.BooleanField("x", "Is this kline closed?"),
+                        new org.khod.pojo.field.DecimalField("q", "Base asset volume"),
+                        new org.khod.pojo.field.DecimalField("V", "Taker buy volume"),
+                        new org.khod.pojo.field.DecimalField("Q", "Taker buy base asset volume"),
+                        new StringField("B", "Ignore")
+                })
+        };
+    }
 }

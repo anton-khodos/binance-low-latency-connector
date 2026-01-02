@@ -12,7 +12,7 @@ public interface IBinanceWebSocketClient {
     int allMiniTickerStream(IWebSocketCallback<IndividualSymbolMini> onMessageCallback);
     int allTickerStream(IWebSocketCallback<IndividualSymbol> onMessageCallback);
     int allBookTickerStream(IWebSocketCallback<SymbolBook> onMessageCallback);
-    int partialDepthStream(String symbol, int levels, int speed, IWebSocketCallback<PartialBookDepth> onMessageCallback);
+    int partialDepthStream(String symbol, int levels, int speed, IWebSocketCallback<DepthUpdate> onMessageCallback);
     int diffDepthStream(String symbol, int speed, IWebSocketCallback<DepthUpdate> onMessageCallback);
     int markPriceStream(String symbol, int speed, IWebSocketCallback<MarkPrice> onMessageCallback);
     int continuousKlineStream(String pair, String interval, String contractType, IWebSocketCallback<ContinuousKline> onMessageCallback);
