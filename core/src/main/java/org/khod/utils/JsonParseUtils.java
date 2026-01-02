@@ -7,7 +7,7 @@ public class JsonParseUtils {
 
     public static byte peek(ByteBuf buff) throws JsonParseException {
         if (!buff.isReadable()) {
-            throw new JsonParseException(String.format("Incomplete json received."), buff.readerIndex());
+            throw new JsonParseException("Incomplete json received.", buff.readerIndex());
         }
         return buff.getByte(buff.readerIndex());
     }
@@ -17,7 +17,7 @@ public class JsonParseUtils {
             if(!Character.isWhitespace((char) peek(buff))) {
                 return;
             }
-            byte b = buff.readByte();
+            buff.readByte();
         }
     }
 

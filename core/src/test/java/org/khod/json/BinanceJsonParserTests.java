@@ -126,7 +126,6 @@ public class BinanceJsonParserTests {
               "l": 105,
               "T": 123456785
             """;
-    public static final String EMPTY_JSON = "{}";
 
     @Test
     public void parseBinanceAggTradePojo()
@@ -261,9 +260,7 @@ public class BinanceJsonParserTests {
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(INVALID_JSON.length());
         buffer.writeCharSequence(INVALID_JSON, StandardCharsets.US_ASCII);
 
-        Assertions.assertThrows(JsonParseException.class, () -> {
-            BinanceJsonParser.parsePojo(buffer, pojo);
-        });
+        Assertions.assertThrows(JsonParseException.class, () -> BinanceJsonParser.parsePojo(buffer, pojo));
     }
 
     @Test
@@ -272,8 +269,6 @@ public class BinanceJsonParserTests {
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(INCOMPLETE_JSON.length());
         buffer.writeCharSequence(INCOMPLETE_JSON, StandardCharsets.US_ASCII); // Missing closing brace
 
-        Assertions.assertThrows(JsonParseException.class, () -> {
-            BinanceJsonParser.parsePojo(buffer, pojo);
-        });
+        Assertions.assertThrows(JsonParseException.class, () -> BinanceJsonParser.parsePojo(buffer, pojo));
     }
 }

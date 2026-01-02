@@ -65,12 +65,8 @@ public class BinanceJsonParser {
                 value.setLength(0);
                 parseString(buffer, value);
             }
-            case OBJECT -> {
-                parsePojo(buffer, ((ObjectField) field).getValue());
-            }
-            case ARRAY -> {
-                parseArray(buffer, ((ArrayField) field));
-            }
+            case OBJECT -> parsePojo(buffer, ((ObjectField) field).getValue());
+            case ARRAY -> parseArray(buffer, ((ArrayField) field));
         }
         skipWhiteSpaces(buffer);
     }

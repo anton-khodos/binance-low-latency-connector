@@ -12,8 +12,7 @@ public abstract class DefaultPojoItem {
     public DefaultPojoItem(Field[] fields) {
         this.fields = fields;
         this.fieldMap = new HashMap<>(fields.length);
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (Field field : fields) {
             fieldMap.put(field.getName(), field);
         }
 
