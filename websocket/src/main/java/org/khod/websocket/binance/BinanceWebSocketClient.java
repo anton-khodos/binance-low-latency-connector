@@ -2,8 +2,8 @@ package org.khod.websocket.binance;
 
 import io.netty.buffer.ByteBuf;
 import org.jctools.queues.SpscArrayQueue;
-import org.khod.pojo.item.BinanceAggTrade;
-import org.khod.pojo.item.BinanceSymbolBook;
+import org.khod.pojo.item.AggTrade;
+import org.khod.pojo.item.SymbolBook;
 import org.khod.utils.URLBuilder;
 import org.khod.websocket.IWebSocketCallback;
 import org.khod.websocket.WebSocketClient;
@@ -20,17 +20,17 @@ public class BinanceWebSocketClient {
     }
 
 
-    public int aggTradeStream(String symbol, IWebSocketCallback<BinanceAggTrade> onMessageCallback) {
+    public int aggTradeStream(String symbol, IWebSocketCallback<AggTrade> onMessageCallback) {
         final SpscArrayQueue<ByteBuf> queue = new SpscArrayQueue<>(1024);
-        final BinanceAggTrade flyweightItem = new BinanceAggTrade();
+        final AggTrade flyweightItem = new AggTrade();
         final String url = useTestURL ?
                 URLBuilder.buildBinanceTestURL(symbol, "aggTrade") :
                 URLBuilder.buildBinanceProdURL(symbol, "aggTrade");
 
         WebSocketClient client = new WebSocketClient(queue, url);
-        BinanceJsonQueueConsumer<BinanceAggTrade> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
-                                                                                                        onMessageCallback,
-                                                                                                        flyweightItem
+        BinanceJsonQueueConsumer<AggTrade> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
+                                                                                                 onMessageCallback,
+                                                                                                 flyweightItem
         );
         WebSocketConnection connection = new WebSocketConnection(client, aggTradeJsonConsumer);
         connection.start();
@@ -39,17 +39,17 @@ public class BinanceWebSocketClient {
         return connectionIndex++;
     }
 
-    public int individualSymbolBookStream(String symbol, IWebSocketCallback<BinanceSymbolBook> onMessageCallback) {
+    public int individualSymbolBookStream(String symbol, IWebSocketCallback<SymbolBook> onMessageCallback) {
         final SpscArrayQueue<ByteBuf> queue = new SpscArrayQueue<>(1024);
-        final BinanceSymbolBook flyweightItem = new BinanceSymbolBook();
+        final SymbolBook flyweightItem = new SymbolBook();
         final String url = useTestURL ?
                 URLBuilder.buildBinanceTestURL(symbol, "bookTicker") :
                 URLBuilder.buildBinanceProdURL(symbol, "bookTicker");
 
         WebSocketClient client = new WebSocketClient(queue, url);
-        BinanceJsonQueueConsumer<BinanceSymbolBook> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
-                                                                                                        onMessageCallback,
-                                                                                                        flyweightItem
+        BinanceJsonQueueConsumer<SymbolBook> aggTradeJsonConsumer = new BinanceJsonQueueConsumer<>(queue,
+                                                                                                   onMessageCallback,
+                                                                                                   flyweightItem
         );
         WebSocketConnection connection = new WebSocketConnection(client, aggTradeJsonConsumer);
         connection.start();

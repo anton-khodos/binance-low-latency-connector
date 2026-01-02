@@ -16,8 +16,8 @@ import org.khod.pojo.field.*;
  * }
  */
 
-public class BinanceSymbolBook extends DefaultPojoItem {
-    public BinanceSymbolBook() {
+public class SymbolBook extends DefaultPojoItem {
+    public SymbolBook() {
         super(getFieldDefinition());
     }
 

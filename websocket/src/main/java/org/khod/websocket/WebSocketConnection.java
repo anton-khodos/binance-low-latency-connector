@@ -1,7 +1,6 @@
 package org.khod.websocket;
 
 import org.khod.data.ILifetimeObject;
-import org.khod.pojo.item.BinanceAggTrade;
 
 import javax.net.ssl.SSLException;
 

@@ -130,7 +130,7 @@ public class BinanceJsonParserTests {
     @Test
     public void parseBinanceAggTradePojo()
             throws JsonParseException {
-        BinanceAggTrade pojo = new BinanceAggTrade();
+        AggTrade pojo = new AggTrade();
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(aggTradeJson.length());
         buffer.writeCharSequence(aggTradeJson, StandardCharsets.US_ASCII);
 
@@ -153,7 +153,7 @@ public class BinanceJsonParserTests {
     @Test
     public void parseBinanceBinanceSymbolBookPojo()
             throws JsonParseException {
-        BinanceSymbolBook pojo = new BinanceSymbolBook();
+        SymbolBook pojo = new SymbolBook();
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(binanceSymbolBookJson.length());
         buffer.writeCharSequence(binanceSymbolBookJson, StandardCharsets.US_ASCII);
 
@@ -256,7 +256,7 @@ public class BinanceJsonParserTests {
 
     @Test
     public void parseInvalidJsonShouldThrow() {
-        BinanceAggTrade pojo = new BinanceAggTrade();
+        AggTrade pojo = new AggTrade();
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(INVALID_JSON.length());
         buffer.writeCharSequence(INVALID_JSON, StandardCharsets.US_ASCII);
 
@@ -265,7 +265,7 @@ public class BinanceJsonParserTests {
 
     @Test
     public void parseIncompleteJsonShouldThrow() {
-        BinanceAggTrade pojo = new BinanceAggTrade();
+        AggTrade pojo = new AggTrade();
         ByteBuf buffer = ByteBufAllocator.DEFAULT.directBuffer(INCOMPLETE_JSON.length());
         buffer.writeCharSequence(INCOMPLETE_JSON, StandardCharsets.US_ASCII); // Missing closing brace
 
