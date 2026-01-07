@@ -36,6 +36,7 @@ public class BinanceJsonParserTests {
               "a": 5933014,
               "p": "0.001",
               "q": "100",
+              "nq": "100",
               "f": 100,
               "l": 105,
               "T": 123456785,
@@ -223,6 +224,7 @@ public class BinanceJsonParserTests {
 
         Assertions.assertEquals("0.001", ((DecimalField) pojo.getFieldMap().get("p")).getValue().toString());
         Assertions.assertEquals("100", ((DecimalField) pojo.getFieldMap().get("q")).getValue().toString());
+        Assertions.assertEquals("100", ((DecimalField) pojo.getFieldMap().get("nq")).getValue().toString());
 
         Assertions.assertEquals(100, ((LongField) pojo.getFieldMap().get("f")).getValue());
         Assertions.assertEquals(105, ((LongField) pojo.getFieldMap().get("l")).getValue());

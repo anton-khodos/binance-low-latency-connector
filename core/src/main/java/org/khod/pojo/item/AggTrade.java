@@ -10,6 +10,7 @@ import org.khod.pojo.field.*;
  *   "a": 5933014,		// Aggregate trade ID
  *   "p": "0.001",     // Price
  *   "q": "100",       // Quantity
+ *   "nq": "100",      // Normal quantity without the trades involving RPI orders
  *   "f": 100,         // First trade ID
  *   "l": 105,         // Last trade ID
  *   "T": 123456785,   // Trade time
@@ -30,6 +31,7 @@ public class AggTrade extends DefaultPojoItem {
             new LongField("a", "Aggregate trade ID"),
             new DecimalField("p", "Price"),
             new DecimalField("q", "Quantity"),
+            new DecimalField("nq", "Normal quantity without the trades involving RPI orders"),
             new LongField("f", "First trade ID"),
             new LongField("l", "Last trade ID"),
             new LongField("T", "Trade time"),
